@@ -1,6 +1,7 @@
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.filter.*;
 import org.apache.hadoop.hbase.io.compress.Compression;
 import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -89,6 +90,50 @@ public class HbaseConnection {
         ResultScanner scanner = table.getScanner(scan);
         for(Result result : scanner){
             formatResult(result);
+        }
+        table.close();
+    }
+
+    public void filterTest(String tableName) throws IOException {
+        Scan scan =new Scan();
+        scan.setCaching(1000);
+//        RowFilter rowfilter = new RowFilter(CompareFilter.CompareOp.EQUAL,
+//                new BinaryComparator(Bytes.toBytes("Tom")));
+        RowFilter rowfilter = new RowFilter(CompareFilter.CompareOp.EQUAL,
+                new RegexStringComparator("T\\w+"));
+        scan.setFilter(rowfilter);
+        Table table = hConn.getTable(TableName.valueOf(tableName));
+        ResultScanner scanner = table.getScanner(scan);
+        for(Result result : scanner){
+            formatResult(result);
+        }
+        table.close();
+    }
+
+    public void pageFilterTest(String tableName) throws IOException {
+        PageFilter filter =new PageFilter(4);
+        byte[] lastRow = null;
+        int pageCount = 0;
+        Table table = hConn.getTable(TableName.valueOf(tableName));
+        while(++pageCount > 0){
+            System.out.println("Page is " + pageCount);
+            Scan scan = new Scan();
+            scan.setFilter(filter);
+            if(lastRow != null){
+                scan.setStartRow(lastRow);
+            }
+            ResultScanner scanner =table.getScanner(scan);
+            int count =0;
+            for(Result res: scanner){
+                lastRow = res.getRow();
+                if(++count >3 )
+                    break;
+                formatResult(res);
+            }
+
+            scanner.close();
+            if(count < 3)
+                break;
         }
     }
 }

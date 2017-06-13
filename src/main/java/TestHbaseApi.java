@@ -34,5 +34,6 @@ public class TestHbaseApi {
         conn.formatResult(result);
 
         conn.hbaseScan("student");
+        conn.filterTest("student");
     }
 }
