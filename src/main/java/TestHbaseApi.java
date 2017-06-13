@@ -32,5 +32,7 @@ public class TestHbaseApi {
         conn.saveData("student",puts);
         Result result = conn.getData("student","Tom");
         conn.formatResult(result);
+
+        conn.hbaseScan("student");
     }
 }

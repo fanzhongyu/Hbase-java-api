@@ -79,5 +79,16 @@ public class HbaseConnection {
             String value = Bytes.toString(CellUtil.cloneValue(cell));
             System.out.println("columnfamily -> "+family+":"+qualifier+"  value -> "+value);
         }
+        System.out.println("*********************************");
+    }
+
+    public void hbaseScan(String tableName) throws IOException {
+        Scan scan =new Scan();
+        scan.setCaching(1000);
+        Table table = hConn.getTable(TableName.valueOf(tableName));
+        ResultScanner scanner = table.getScanner(scan);
+        for(Result result : scanner){
+            formatResult(result);
+        }
     }
 }
