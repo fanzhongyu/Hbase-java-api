@@ -39,7 +39,7 @@ public class HbaseConnection {
             throw new IOException("table exists");
         }
         else{
-            HTableDescriptor tableDesc = new HTableDescriptor(tableName);
+            HTableDescriptor tableDesc = new HTableDescriptor(TableName.valueOf(tableName));
             for(String col : cols) {
                 HColumnDescriptor columnDesc = new HColumnDescriptor(col);
                 columnDesc.setCompressionType(Compression.Algorithm.GZ);   //设置压缩方式
@@ -114,6 +114,7 @@ public class HbaseConnection {
         PageFilter filter =new PageFilter(4);
         byte[] lastRow = null;
         int pageCount = 0;
+        int totalRow = 0;
         Table table = hConn.getTable(TableName.valueOf(tableName));
         while(++pageCount > 0){
             System.out.println("Page is " + pageCount);
@@ -128,6 +129,7 @@ public class HbaseConnection {
                 lastRow = res.getRow();
                 if(++count >3 )
                     break;
+                totalRow++;
                 formatResult(res);
             }
 
@@ -135,5 +137,6 @@ public class HbaseConnection {
             if(count < 3)
                 break;
         }
+        System.out.println("totalRow is "+ totalRow);
     }
 }
